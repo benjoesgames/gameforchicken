@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://dcgywi876mbr0"]
+[gd_scene load_steps=12 format=3 uid="uid://dcgywi876mbr0"]
 
 [ext_resource type="Script" uid="uid://vhyfpekhxo5" path="res://scripts/states/state_machines/battle_manager.gd" id="1_k01do"]
 [ext_resource type="Script" uid="uid://d2ynv7b0m1wu8" path="res://scripts/states/initialize.gd" id="2_67f7m"]
@@ -7,11 +7,6 @@
 [ext_resource type="Resource" uid="uid://cvjbxri5wqa4p" path="res://resources/dice/virtual_dice/default_dice.tres" id="3_vuubt"]
 [ext_resource type="Script" uid="uid://kqo7bmnuddcx" path="res://scripts/states/move.gd" id="4_6ptix"]
 [ext_resource type="Script" uid="uid://ckqxe66gq5pm8" path="res://scripts/states/activate_space.gd" id="14_k01do"]
-
-[sub_resource type="Resource" id="Resource_538qk"]
-script = ExtResource("3_d7bn2")
-max_health = 3
-metadata/_custom_type_script = "uid://clat5ribpcbwd"
 
 [sub_resource type="Resource" id="Resource_wnvq8"]
 script = ExtResource("3_d7bn2")
@@ -44,18 +39,15 @@ func _custom_enter() -> void:
 [sub_resource type="GDScript" id="GDScript_k01do"]
 script/source = "extends StateBase
 
+@export var game_state_manager : StateMachine
+@export var regular_game : StateBase
+
 func _custom_enter() -> void:
-	print(\"You WIN!\")
+	game_state_manager.change_state(regular_game)
 "
 
-[node name="Battle_Manager" type="Node" node_paths=PackedStringArray("die_state", "win_state", "move_scripts", "roll_scripts", "start_state")]
+[node name="Battle_Manager" type="Node"]
 script = ExtResource("1_k01do")
-enemies = Array[ExtResource("3_d7bn2")]([SubResource("Resource_538qk")])
-die_state = NodePath("Die")
-win_state = NodePath("Win")
-move_scripts = [NodePath("Move"), NodePath("EnemyMove")]
-roll_scripts = [NodePath("UseItem"), NodePath("EnemyRoll")]
-start_state = NodePath("Initialize")
 metadata/_custom_type_script = "uid://co3aoxk3kra10"
 
 [node name="Initialize" type="Node" parent="." node_paths=PackedStringArray("first_state")]

@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://dcpt4gudnx53n"]
+[gd_scene load_steps=50 format=3 uid="uid://dcpt4gudnx53n"]
 
 [ext_resource type="Script" uid="uid://co3aoxk3kra10" path="res://scripts/generic/state_machine/state_machine.gd" id="1_ldkr4"]
 [ext_resource type="PackedScene" uid="uid://d1n0htifmonfk" path="res://scenes/managers/game_manager.tscn" id="1_mw25s"]
@@ -18,8 +18,15 @@
 [ext_resource type="Script" uid="uid://cs1k8ut6sxote" path="res://scripts/board/boards/battle_board.gd" id="9_liy57"]
 [ext_resource type="PackedScene" uid="uid://rdxyckkjlmx6" path="res://assets/models/environment/battlefield.glb" id="10_mwyo0"]
 [ext_resource type="PackedScene" uid="uid://4qg3oj3ymbfj" path="res://scenes/board/spaces/game/battle_space.tscn" id="11_ttvoq"]
+[ext_resource type="Script" uid="uid://vhyfpekhxo5" path="res://scripts/states/state_machines/battle_manager.gd" id="12_r47aq"]
 [ext_resource type="PackedScene" uid="uid://8emees61l770" path="res://scenes/board/spaces/game/transition_space.tscn" id="12_rw4oa"]
+[ext_resource type="Script" uid="uid://clat5ribpcbwd" path="res://scripts/resources/player_data.gd" id="13_6irsn"]
 [ext_resource type="PackedScene" uid="uid://dd4ah61u5mrnf" path="res://scenes/board/spaces/testing/layer_agnostic_space.tscn" id="13_r47aq"]
+[ext_resource type="PackedScene" uid="uid://ca37jjruky08d" path="res://scenes/board/spaces/battle/action_space.tscn" id="14_ttvoq"]
+[ext_resource type="PackedScene" uid="uid://1yb4sya2nes8" path="res://scenes/board/spaces/battle/attack_space.tscn" id="15_rw4oa"]
+[ext_resource type="PackedScene" uid="uid://b0k62ncpwssf1" path="res://scenes/board/spaces/battle/critical_space.tscn" id="16_r47aq"]
+[ext_resource type="PackedScene" uid="uid://dyd8ppr3y8ea" path="res://scenes/board/spaces/battle/defend_space.tscn" id="17_6irsn"]
+[ext_resource type="PackedScene" uid="uid://bj1aw6ajmoifg" path="res://scenes/board/spaces/battle/empty_space.tscn" id="18_gqftm"]
 [ext_resource type="Script" uid="uid://beyulqvrwnx27" path="res://scripts/camera_target.gd" id="21_ro0ie"]
 
 [sub_resource type="GDScript" id="GDScript_6aqbo"]
@@ -240,7 +247,10 @@ func layer_changed(_new_layer : int) -> void:
 [sub_resource type="Resource" id="Resource_mwyo0"]
 script = ExtResource("2_tcjrq")
 space_settings = Dictionary[NodePath, int]({
-NodePath("../../ActivateSpace/Layer_Agnostic_Space"): 9
+NodePath("../../ActivateSpace/Attack_Space"): 4,
+NodePath("../../ActivateSpace/Critical_Space"): 1,
+NodePath("../../ActivateSpace/Defend_Space"): 3,
+NodePath("../../ActivateSpace/Empty_Space"): 1
 })
 metadata/_custom_type_script = "uid://c77s1mu4f6488"
 
@@ -249,6 +259,11 @@ albedo_color = Color(0.351563, 0.351563, 0.351563, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ro0ie"]
 albedo_color = Color(0.435408, 0.216746, 0.17777, 1)
+
+[sub_resource type="Resource" id="Resource_gqftm"]
+script = ExtResource("13_6irsn")
+max_health = 3
+metadata/_custom_type_script = "uid://clat5ribpcbwd"
 
 [sub_resource type="Environment" id="Environment_kk2rg"]
 ambient_light_source = 2
@@ -418,8 +433,13 @@ quest_manager = NodePath("../../../QuestManager")
 [node name="Layer_Agnostic_Space" parent="Game_Manager/ActivateSpace" index="2" instance=ExtResource("13_r47aq")]
 visible = false
 
-[node name="Battle_Manager" parent="." instance=ExtResource("3_rvs2r")]
+[node name="Battle_Manager" parent="." node_paths=PackedStringArray("start_state") instance=ExtResource("3_rvs2r")]
+script = ExtResource("1_ldkr4")
+auto_start = false
+start_state = NodePath("Initialize")
 active = false
+print_enter = false
+print_exit = false
 
 [node name="Node" type="Node" parent="Battle_Manager/UseItem" index="0"]
 script = SubResource("GDScript_6aqbo")
@@ -430,7 +450,7 @@ board = NodePath("BattleBoard")
 
 [node name="BattleBoard" type="Node" parent="Battle_Manager/Move" index="0" node_paths=PackedStringArray("start_space", "layer_positions", "center", "board_node")]
 script = ExtResource("9_liy57")
-start_space = NodePath("../../ActivateSpace/Layer_Agnostic_Space")
+start_space = NodePath("../../ActivateSpace/Action_Space")
 layer_positions = [NodePath("BoardNode/Center/layer_1_pos")]
 center = NodePath("BoardNode/Center")
 board_node = NodePath("BoardNode")
@@ -455,11 +475,6 @@ mesh = SubResource("BoxMesh_kk2rg")
 skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("StandardMaterial3D_6aqbo")
 
-[node name="RemoteTransform3D" type="RemoteTransform3D" parent="Battle_Manager/Move/BattleBoard/PlayerRig/Player"]
-remote_path = NodePath("../../../../../../CameraPositions/PlayerFollower")
-update_rotation = false
-update_scale = false
-
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Battle_Manager/Move/BattleBoard/PlayerRig/Player"]
 libraries = {
 &"": SubResource("AnimationLibrary_ro0ie")
@@ -481,8 +496,25 @@ surface_material_override/0 = SubResource("StandardMaterial3D_s76x2")
 [node name="layer_1_pos" type="Node3D" parent="Battle_Manager/Move/BattleBoard/BoardNode/Center"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.757558)
 
-[node name="Layer_Agnostic_Space" parent="Battle_Manager/ActivateSpace" index="0" instance=ExtResource("13_r47aq")]
+[node name="Action_Space" parent="Battle_Manager/ActivateSpace" index="0" node_paths=PackedStringArray("battle_manager") instance=ExtResource("14_ttvoq")]
 visible = false
+battle_manager = NodePath("../../BattleManager")
+
+[node name="Attack_Space" parent="Battle_Manager/ActivateSpace" index="1" node_paths=PackedStringArray("battle_manager") instance=ExtResource("15_rw4oa")]
+visible = false
+battle_manager = NodePath("../../BattleManager")
+
+[node name="Critical_Space" parent="Battle_Manager/ActivateSpace" index="2" node_paths=PackedStringArray("battle_manager") instance=ExtResource("16_r47aq")]
+visible = false
+battle_manager = NodePath("../../BattleManager")
+
+[node name="Defend_Space" parent="Battle_Manager/ActivateSpace" index="3" node_paths=PackedStringArray("battle_manager") instance=ExtResource("17_6irsn")]
+visible = false
+battle_manager = NodePath("../../BattleManager")
+
+[node name="Empty_Space" parent="Battle_Manager/ActivateSpace" index="4" node_paths=PackedStringArray("battle_manager") instance=ExtResource("18_gqftm")]
+visible = false
+battle_manager = NodePath("../../BattleManager")
 
 [node name="EnemyMove" parent="Battle_Manager" index="5" node_paths=PackedStringArray("board")]
 board = NodePath("../Move/BattleBoard")
@@ -505,11 +537,6 @@ mesh = SubResource("BoxMesh_kk2rg")
 skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("StandardMaterial3D_ro0ie")
 
-[node name="RemoteTransform3D" type="RemoteTransform3D" parent="Battle_Manager/EnemyMove/EnemyRig/Player"]
-remote_path = NodePath("../../../../../CameraPositions/PlayerFollower")
-update_rotation = false
-update_scale = false
-
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Battle_Manager/EnemyMove/EnemyRig/Player"]
 libraries = {
 &"": SubResource("AnimationLibrary_ro0ie")
@@ -517,6 +544,19 @@ libraries = {
 
 [node name="Layer_1_Position" type="Node3D" parent="Battle_Manager/EnemyMove/EnemyRig"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, -1, -7.5)
+
+[node name="Win" parent="Battle_Manager" index="8" node_paths=PackedStringArray("game_state_manager", "regular_game")]
+game_state_manager = NodePath("../../Game_State_Manager")
+regular_game = NodePath("../../Game_State_Manager/Regular_Game")
+
+[node name="BattleManager" type="Node" parent="Battle_Manager" node_paths=PackedStringArray("state_machine", "die_state", "win_state", "move_scripts", "roll_scripts")]
+script = ExtResource("12_r47aq")
+enemies = Array[ExtResource("13_6irsn")]([SubResource("Resource_gqftm")])
+state_machine = NodePath("..")
+die_state = NodePath("../Die")
+win_state = NodePath("../Win")
+move_scripts = [NodePath("../Move"), NodePath("../EnemyMove")]
+roll_scripts = [NodePath("../UseItem"), NodePath("../EnemyRoll")]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_kk2rg")
@@ -570,7 +610,6 @@ tween_curve = SubResource("Curve_kk2rg")
 [node name="CameraPositions" type="Node" parent="."]
 
 [node name="PlayerFollower" type="Node3D" parent="CameraPositions"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -100, 0)
 
 [node name="PlayerRig" type="Node3D" parent="CameraPositions/PlayerFollower"]
 transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 0, 0)

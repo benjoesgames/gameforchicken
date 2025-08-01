@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3 uid="uid://b0k62ncpwssf1"]
+
+[ext_resource type="PackedScene" uid="uid://dd4ah61u5mrnf" path="res://scenes/board/spaces/testing/layer_agnostic_space.tscn" id="1_113ll"]
+[ext_resource type="Script" uid="uid://cxaf7ayb8qaes" path="res://scripts/board/spaces/battle/critical.gd" id="2_td1um"]
+[ext_resource type="Texture2D" uid="uid://df2r5sjfbl547" path="res://assets/textures/testing/kenney_icons/dice_sword.png" id="3_td1um"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xnuxq"]
+albedo_color = Color(0.651549, 0.291264, 0.211814, 1)
+
+[node name="Critical_Space" instance=ExtResource("1_113ll")]
+script = ExtResource("2_td1um")
+
+[node name="Cylinder_010" parent="layer_agnostic_space2" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_xnuxq")
+
+[node name="Sprite" parent="." index="1"]
+texture = ExtResource("3_td1um")
+
+[editable path="layer_agnostic_space2"]

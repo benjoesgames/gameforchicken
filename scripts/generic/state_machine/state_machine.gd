@@ -19,6 +19,8 @@ func _ready() -> void:
 
 func set_active(value : bool) -> void:
 	active = value
+	if value and not current_state:
+		start()
 	active_set.emit(active)
 
 func start() -> void:

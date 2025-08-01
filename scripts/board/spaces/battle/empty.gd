@@ -1,0 +1,2 @@
+extends BattleSpaceBase
+class_name EmptySpace

@@ -1,9 +1,10 @@
-extends StateMachine
+extends Node
 class_name BattleManager
 
 @export var enemies : Array[PlayerData] = []
 
 @export_category("States")
+@export var state_machine : StateMachine
 @export var die_state : StateBase
 @export var win_state : StateBase
 @export var move_scripts : Array[Move]
@@ -14,11 +15,9 @@ var battle_data : Array[PlayerData] = []
 var finished : bool = false
 
 func _ready() -> void:
-	super()
 	finished = false
 	battle_data = enemies.duplicate()
 	battle_data.push_front(GlobalValues.player_data)
-	GlobalValues.battle_manager = self
 	for p in battle_data.size():
 		battle_data[p].dead.connect(_player_died.bind(p), CONNECT_ONE_SHOT)
 
@@ -41,7 +40,6 @@ func run_action(player : int) -> void:
 	print("ACTION!")
 	for m in move_scripts:
 		m.current_space = 0
-		m.transition = true
 	
 	var other = abs(player - 1)
 	
@@ -62,12 +60,12 @@ func run_action(player : int) -> void:
 		b.defends = 0
 	
 	if not finished:
-		change_state(roll_scripts[other])
+		state_machine.change_state(roll_scripts[other])
 
 func _player_died(player : int) -> void:
 	finished = true
 	print("Player %s died!" % player)
 	if player == 0:
-		change_state(die_state)
+		state_machine.change_state(die_state)
 	else:
-		change_state(win_state)
+		state_machine.change_state(win_state)

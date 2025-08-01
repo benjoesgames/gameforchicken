@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://ca37jjruky08d"]
+
+[ext_resource type="PackedScene" uid="uid://dd4ah61u5mrnf" path="res://scenes/board/spaces/testing/layer_agnostic_space.tscn" id="1_4igjd"]
+[ext_resource type="Script" uid="uid://c5g1x5d3nw6a5" path="res://scripts/board/spaces/battle/action.gd" id="2_bcbd5"]
+[ext_resource type="Texture2D" uid="uid://cqha1g4voqr6l" path="res://assets/textures/testing/kenney_icons/flag_square.png" id="3_xigpo"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4igjd"]
+albedo_color = Color(0.533452, 0.384681, 0.162496, 1)
+
+[node name="Action_Space" instance=ExtResource("1_4igjd")]
+script = ExtResource("2_bcbd5")
+
+[node name="Cylinder_010" parent="layer_agnostic_space2" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000991777, 0.00169763, -0.00238776)
+surface_material_override/0 = SubResource("StandardMaterial3D_4igjd")
+
+[node name="Sprite" parent="." index="1"]
+texture = ExtResource("3_xigpo")
+
+[editable path="layer_agnostic_space2"]

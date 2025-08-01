@@ -20,7 +20,8 @@ func _custom_generate_board() -> void:
 			var new_space : Node3D = space.duplicate()
 			board_nodes[l].append(new_space)
 			board_node.add_child(new_space)
+			new_space.owner = board_node.owner
 			new_space.show()
-			center.rotation_degrees = Vector3(0, (360.0 / space_size) * s, 0)
+			center.rotation_degrees = Vector3(0, -(360.0 / space_size) * s, 0)
 			new_space.global_position = layer_positions[l].global_position
 			new_space.global_rotation_degrees = layer_positions[l].global_rotation_degrees

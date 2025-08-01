@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3 uid="uid://1yb4sya2nes8"]
+
+[ext_resource type="PackedScene" uid="uid://dd4ah61u5mrnf" path="res://scenes/board/spaces/testing/layer_agnostic_space.tscn" id="1_r41c0"]
+[ext_resource type="Script" uid="uid://dvd1v6n0k8c7d" path="res://scripts/board/spaces/battle/attack.gd" id="2_d55in"]
+[ext_resource type="Texture2D" uid="uid://cpy43craheomk" path="res://assets/textures/testing/kenney_icons/sword.png" id="2_gal4t"]
+
+[node name="Attack_Space" instance=ExtResource("1_r41c0")]
+script = ExtResource("2_d55in")
+
+[node name="Sprite" parent="." index="1"]
+texture = ExtResource("2_gal4t")
+
+[editable path="layer_agnostic_space2"]
