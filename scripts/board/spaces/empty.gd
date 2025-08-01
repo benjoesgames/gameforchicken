@@ -1,0 +1,2 @@
+extends SpaceBase
+class_name EmptySpace

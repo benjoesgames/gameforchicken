@@ -1,0 +1,57 @@
+[gd_scene load_steps=11 format=3 uid="uid://d1n0htifmonfk"]
+
+[ext_resource type="Script" uid="uid://co3aoxk3kra10" path="res://scripts/generic/state_machine/state_machine.gd" id="1_r76ct"]
+[ext_resource type="Script" uid="uid://d2ynv7b0m1wu8" path="res://scripts/states/initialize.gd" id="2_3yu1d"]
+[ext_resource type="Script" uid="uid://bny1fvx21jokk" path="res://scripts/states/use_item.gd" id="2_6t86j"]
+[ext_resource type="Script" uid="uid://clat5ribpcbwd" path="res://scripts/resources/player_data.gd" id="3_vcwo2"]
+[ext_resource type="Script" uid="uid://kqo7bmnuddcx" path="res://scripts/states/move.gd" id="4_3yu1d"]
+[ext_resource type="Resource" uid="uid://cvjbxri5wqa4p" path="res://resources/dice/virtual_dice/default_dice.tres" id="5_vcwo2"]
+[ext_resource type="Script" uid="uid://dlpe3g0jvmaxr" path="res://scripts/generic/state_machine/state_base.gd" id="6_c2g8d"]
+[ext_resource type="Script" uid="uid://ckqxe66gq5pm8" path="res://scripts/states/activate_space.gd" id="7_fagfu"]
+
+[sub_resource type="Resource" id="Resource_6gfjl"]
+script = ExtResource("3_vcwo2")
+max_health = 10
+metadata/_custom_type_script = "uid://clat5ribpcbwd"
+
+[sub_resource type="GDScript" id="GDScript_psj4q"]
+script/source = "extends StateBase
+
+func _custom_enter() -> void:
+	print(\"You WIN!\")
+"
+
+[node name="Game_Manager" type="Node" node_paths=PackedStringArray("start_state")]
+script = ExtResource("1_r76ct")
+start_state = NodePath("Initialize")
+
+[node name="Initialize" type="Node" parent="." node_paths=PackedStringArray("first_state")]
+script = ExtResource("2_3yu1d")
+player_data = SubResource("Resource_6gfjl")
+default_dice = ExtResource("5_vcwo2")
+first_state = NodePath("../UseItem")
+metadata/_custom_type_script = "uid://dlpe3g0jvmaxr"
+
+[node name="UseItem" type="Node" parent="." node_paths=PackedStringArray("move_state")]
+script = ExtResource("2_6t86j")
+move_state = NodePath("../MovePlayer")
+metadata/_custom_type_script = "uid://dlpe3g0jvmaxr"
+
+[node name="MovePlayer" type="Node" parent="." node_paths=PackedStringArray("activate_space", "transition_layer")]
+script = ExtResource("4_3yu1d")
+activate_space = NodePath("../ActivateSpace")
+transition_layer = NodePath("../TransitionLayer")
+metadata/_custom_type_script = "uid://dlpe3g0jvmaxr"
+
+[node name="TransitionLayer" type="Node" parent="."]
+script = ExtResource("6_c2g8d")
+metadata/_custom_type_script = "uid://dlpe3g0jvmaxr"
+
+[node name="ActivateSpace" type="Node" parent="." node_paths=PackedStringArray("use_item")]
+script = ExtResource("7_fagfu")
+use_item = NodePath("../UseItem")
+metadata/_custom_type_script = "uid://dlpe3g0jvmaxr"
+
+[node name="Win" type="Node" parent="."]
+script = SubResource("GDScript_psj4q")
+metadata/_custom_type_script = "uid://dlpe3g0jvmaxr"

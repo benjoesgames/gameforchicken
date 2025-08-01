@@ -1,0 +1,107 @@
+[gd_scene load_steps=13 format=3 uid="uid://dcgywi876mbr0"]
+
+[ext_resource type="Script" uid="uid://vhyfpekhxo5" path="res://scripts/states/state_machines/battle_manager.gd" id="1_k01do"]
+[ext_resource type="Script" uid="uid://d2ynv7b0m1wu8" path="res://scripts/states/initialize.gd" id="2_67f7m"]
+[ext_resource type="Script" uid="uid://bny1fvx21jokk" path="res://scripts/states/use_item.gd" id="2_xgh30"]
+[ext_resource type="Script" uid="uid://clat5ribpcbwd" path="res://scripts/resources/player_data.gd" id="3_d7bn2"]
+[ext_resource type="Resource" uid="uid://cvjbxri5wqa4p" path="res://resources/dice/virtual_dice/default_dice.tres" id="3_vuubt"]
+[ext_resource type="Script" uid="uid://kqo7bmnuddcx" path="res://scripts/states/move.gd" id="4_6ptix"]
+[ext_resource type="Script" uid="uid://ckqxe66gq5pm8" path="res://scripts/states/activate_space.gd" id="14_k01do"]
+
+[sub_resource type="Resource" id="Resource_538qk"]
+script = ExtResource("3_d7bn2")
+max_health = 3
+metadata/_custom_type_script = "uid://clat5ribpcbwd"
+
+[sub_resource type="Resource" id="Resource_wnvq8"]
+script = ExtResource("3_d7bn2")
+max_health = 10
+metadata/_custom_type_script = "uid://clat5ribpcbwd"
+
+[sub_resource type="GDScript" id="GDScript_t7ejn"]
+script/source = "extends StateBase
+
+@export var default_dice : DiceBase
+
+@export_category(\"States\")
+@export var enemy_move : StateBase
+
+func _custom_enter() -> void:
+	await get_tree().create_timer(1).timeout
+	print('enemy')
+	default_dice.use_item()
+	enemy_move.dice = default_dice
+	state_machine.change_state(enemy_move)
+"
+
+[sub_resource type="GDScript" id="GDScript_wju7g"]
+script/source = "extends StateBase
+
+func _custom_enter() -> void:
+	print(\"You lost!\")
+"
+
+[sub_resource type="GDScript" id="GDScript_k01do"]
+script/source = "extends StateBase
+
+func _custom_enter() -> void:
+	print(\"You WIN!\")
+"
+
+[node name="Battle_Manager" type="Node" node_paths=PackedStringArray("die_state", "win_state", "move_scripts", "roll_scripts", "start_state")]
+script = ExtResource("1_k01do")
+enemies = Array[ExtResource("3_d7bn2")]([SubResource("Resource_538qk")])
+die_state = NodePath("Die")
+win_state = NodePath("Win")
+move_scripts = [NodePath("Move"), NodePath("EnemyMove")]
+roll_scripts = [NodePath("UseItem"), NodePath("EnemyRoll")]
+start_state = NodePath("Initialize")
+metadata/_custom_type_script = "uid://co3aoxk3kra10"
+
+[node name="Initialize" type="Node" parent="." node_paths=PackedStringArray("first_state")]
+script = ExtResource("2_67f7m")
+player_data = SubResource("Resource_wnvq8")
+default_dice = ExtResource("3_vuubt")
+first_state = NodePath("../UseItem")
+metadata/_custom_type_script = "uid://d2ynv7b0m1wu8"
+
+[node name="UseItem" type="Node" parent="." node_paths=PackedStringArray("move_state")]
+script = ExtResource("2_xgh30")
+move_state = NodePath("../Move")
+metadata/_custom_type_script = "uid://bny1fvx21jokk"
+
+[node name="Move" type="Node" parent="." node_paths=PackedStringArray("activate_space")]
+script = ExtResource("4_6ptix")
+activate_space = NodePath("../ActivateSpace")
+metadata/_custom_type_script = "uid://kqo7bmnuddcx"
+
+[node name="ActivateSpace" type="Node" parent="." node_paths=PackedStringArray("use_item")]
+script = ExtResource("14_k01do")
+use_item = NodePath("../EnemyRoll")
+metadata/_custom_type_script = "uid://ckqxe66gq5pm8"
+
+[node name="EnemyRoll" type="Node" parent="." node_paths=PackedStringArray("enemy_move")]
+script = SubResource("GDScript_t7ejn")
+default_dice = ExtResource("3_vuubt")
+enemy_move = NodePath("../EnemyMove")
+metadata/_custom_type_script = "uid://dlpe3g0jvmaxr"
+
+[node name="EnemyMove" type="Node" parent="." node_paths=PackedStringArray("activate_space")]
+script = ExtResource("4_6ptix")
+user_id = 1
+activate_space = NodePath("../EnemyActivateSpace")
+metadata/_custom_type_script = "uid://kqo7bmnuddcx"
+
+[node name="EnemyActivateSpace" type="Node" parent="." node_paths=PackedStringArray("use_item")]
+script = ExtResource("14_k01do")
+user_id = 1
+use_item = NodePath("../UseItem")
+metadata/_custom_type_script = "uid://ckqxe66gq5pm8"
+
+[node name="Die" type="Node" parent="."]
+script = SubResource("GDScript_wju7g")
+metadata/_custom_type_script = "uid://dlpe3g0jvmaxr"
+
+[node name="Win" type="Node" parent="."]
+script = SubResource("GDScript_k01do")
+metadata/_custom_type_script = "uid://dlpe3g0jvmaxr"

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="AttackSpace" load_steps=3 format=3 uid="uid://cfqjdota264t4"]
+
+[ext_resource type="Script" uid="uid://dvd1v6n0k8c7d" path="res://scripts/board/spaces/battle/attack.gd" id="1_kx6p4"]
+[ext_resource type="PackedScene" uid="uid://dd4ah61u5mrnf" path="res://scenes/board/spaces/testing/layer_agnostic_space.tscn" id="1_tg2om"]
+
+[resource]
+script = ExtResource("1_kx6p4")
+scene = ExtResource("1_tg2om")
+metadata/_custom_type_script = "uid://dvd1v6n0k8c7d"

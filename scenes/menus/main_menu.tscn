@@ -1,0 +1,111 @@
+[gd_scene load_steps=4 format=3 uid="uid://d04mgy5rydifr"]
+
+[ext_resource type="Script" uid="uid://dq7xwx2fd3o80" path="res://scripts/generic/background_music.gd" id="1_ovrgc"]
+[ext_resource type="AudioStream" uid="uid://cmiamn2slbg7y" path="res://assets/audio/music/Our Story Begins.mp3" id="1_xqga4"]
+
+[sub_resource type="GDScript" id="GDScript_xqga4"]
+script/source = "extends Control
+
+const INTRO_SCENE = preload(\"res://scenes/intro_scene.tscn\")
+
+func _on_play_button_pressed() -> void:
+	SceneManager.load_scene(INTRO_SCENE)
+
+
+func _on_options_button_pressed() -> void:
+	pass # Replace with function body.
+
+
+func _on_exit_button_pressed() -> void:
+	get_tree().quit()
+"
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_xqga4")
+
+[node name="BackgroundMusic" type="Node" parent="."]
+script = ExtResource("1_ovrgc")
+background_audio = ExtResource("1_xqga4")
+metadata/_custom_type_script = "uid://dq7xwx2fd3o80"
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Control3" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="VBoxContainer/TextureRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 64
+text = "Game for Chicken"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Control" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Control"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PlayButton" type="Button" parent="VBoxContainer/Control/VBoxContainer"]
+layout_mode = 2
+text = "Play"
+
+[node name="OptionsButton" type="Button" parent="VBoxContainer/Control/VBoxContainer"]
+visible = false
+layout_mode = 2
+text = "Options"
+
+[node name="ExitButton" type="Button" parent="VBoxContainer/Control/VBoxContainer"]
+layout_mode = 2
+text = "Exit"
+
+[node name="Control2" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[connection signal="pressed" from="VBoxContainer/Control/VBoxContainer/PlayButton" to="." method="_on_play_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/Control/VBoxContainer/OptionsButton" to="." method="_on_options_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/Control/VBoxContainer/ExitButton" to="." method="_on_exit_button_pressed"]

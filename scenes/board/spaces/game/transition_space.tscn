@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3 uid="uid://8emees61l770"]
+
+[ext_resource type="PackedScene" uid="uid://dd4ah61u5mrnf" path="res://scenes/board/spaces/testing/layer_agnostic_space.tscn" id="1_f2q6t"]
+[ext_resource type="Texture2D" uid="uid://d32m4qrm1eeru" path="res://assets/textures/testing/kenney_icons/hexagon_out.png" id="2_mwxki"]
+[ext_resource type="Script" uid="uid://cqib7fshxv107" path="res://scripts/board/spaces/game/transition_space.gd" id="2_pq352"]
+
+[node name="Transfer_Space" instance=ExtResource("1_f2q6t")]
+script = ExtResource("2_pq352")
+
+[node name="Sprite" parent="." index="1"]
+texture = ExtResource("2_mwxki")
+
+[editable path="layer_agnostic_space2"]

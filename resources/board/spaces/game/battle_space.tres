@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="BattleSpace" load_steps=3 format=3 uid="uid://cu8s66womm1xh"]
+
+[ext_resource type="Script" uid="uid://dn4prlr7ogt0b" path="res://scripts/board/spaces/game/battle_space.gd" id="1_1n2yd"]
+[ext_resource type="PackedScene" uid="uid://4qg3oj3ymbfj" path="res://scenes/board/spaces/game/battle_space.tscn" id="1_fbabi"]
+
+[resource]
+script = ExtResource("1_1n2yd")
+scene = ExtResource("1_fbabi")
+metadata/_custom_type_script = "uid://dn4prlr7ogt0b"

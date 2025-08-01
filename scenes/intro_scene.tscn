@@ -1,0 +1,37 @@
+[gd_scene load_steps=4 format=3 uid="uid://dum77ldv321xl"]
+
+[ext_resource type="Script" uid="uid://dq7xwx2fd3o80" path="res://scripts/generic/background_music.gd" id="1_0y5sa"]
+[ext_resource type="AudioStream" uid="uid://cu0ftujfgfhhk" path="res://assets/audio/music/Unholy Knight.mp3" id="1_xmg1o"]
+
+[sub_resource type="GDScript" id="GDScript_xmg1o"]
+script/source = "extends Node3D
+
+const GAME_SCENE = preload(\"res://scenes/game_scene.tscn\")
+
+func _on_skip_button_pressed() -> void:
+	SceneManager.load_scene(GAME_SCENE)
+"
+
+[node name="Intro_Scene" type="Node3D"]
+script = SubResource("GDScript_xmg1o")
+
+[node name="BackgroundMusic" type="Node" parent="."]
+script = ExtResource("1_0y5sa")
+background_audio = ExtResource("1_xmg1o")
+metadata/_custom_type_script = "uid://dq7xwx2fd3o80"
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="SkipButton" type="Button" parent="CanvasLayer"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -25.0
+offset_bottom = -25.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "Skip"
+
+[connection signal="pressed" from="CanvasLayer/SkipButton" to="." method="_on_skip_button_pressed"]

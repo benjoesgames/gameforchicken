@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://bkbd1lyrmo0o6"
+path="res://.godot/imported/Mischief Maker.mp3-4b92407932807abcf427453c1f89d25b.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/Mischief Maker.mp3"
+dest_files=["res://.godot/imported/Mischief Maker.mp3-4b92407932807abcf427453c1f89d25b.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

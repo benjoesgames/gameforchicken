@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ActionSpace" load_steps=3 format=3 uid="uid://cwly68wrcncn1"]
+
+[ext_resource type="Script" uid="uid://c5g1x5d3nw6a5" path="res://scripts/board/spaces/battle/action.gd" id="1_kdvae"]
+[ext_resource type="PackedScene" uid="uid://dd4ah61u5mrnf" path="res://scenes/board/spaces/testing/layer_agnostic_space.tscn" id="1_qne4f"]
+
+[resource]
+script = ExtResource("1_kdvae")
+scene = ExtResource("1_qne4f")
+metadata/_custom_type_script = "uid://c5g1x5d3nw6a5"

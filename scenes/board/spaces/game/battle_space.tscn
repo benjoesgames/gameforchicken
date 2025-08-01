@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3 uid="uid://4qg3oj3ymbfj"]
+
+[ext_resource type="PackedScene" uid="uid://dd4ah61u5mrnf" path="res://scenes/board/spaces/testing/layer_agnostic_space.tscn" id="1_jafri"]
+[ext_resource type="Texture2D" uid="uid://cu54w12228ul" path="res://assets/textures/testing/kenney_icons/skull.png" id="2_aed7k"]
+[ext_resource type="Script" uid="uid://dn4prlr7ogt0b" path="res://scripts/board/spaces/game/battle_space.gd" id="2_npc2p"]
+
+[node name="Battle_Space" instance=ExtResource("1_jafri")]
+script = ExtResource("2_npc2p")
+
+[node name="Sprite" parent="." index="1"]
+texture = ExtResource("2_aed7k")
+
+[editable path="layer_agnostic_space2"]

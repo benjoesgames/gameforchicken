@@ -1,0 +1,619 @@
+[gd_scene load_steps=42 format=3 uid="uid://dcpt4gudnx53n"]
+
+[ext_resource type="Script" uid="uid://co3aoxk3kra10" path="res://scripts/generic/state_machine/state_machine.gd" id="1_ldkr4"]
+[ext_resource type="PackedScene" uid="uid://d1n0htifmonfk" path="res://scenes/managers/game_manager.tscn" id="1_mw25s"]
+[ext_resource type="Script" uid="uid://dq7xwx2fd3o80" path="res://scripts/generic/background_music.gd" id="1_onqr8"]
+[ext_resource type="Script" uid="uid://dlpe3g0jvmaxr" path="res://scripts/generic/state_machine/state_base.gd" id="2_liy57"]
+[ext_resource type="Script" uid="uid://c77s1mu4f6488" path="res://scripts/board/board_layer.gd" id="2_tcjrq"]
+[ext_resource type="AudioStream" uid="uid://0bjvvlxlogqr" path="res://assets/audio/music/Adventures in Adventureland.mp3" id="2_ycayy"]
+[ext_resource type="AudioStream" uid="uid://c8t0o15h554wc" path="res://assets/audio/music/Malicious.mp3" id="3_rurhu"]
+[ext_resource type="PackedScene" uid="uid://dcgywi876mbr0" path="res://scenes/managers/battle_manager.tscn" id="3_rvs2r"]
+[ext_resource type="Script" uid="uid://dukv7uyqshddp" path="res://scripts/board/quest_manager.gd" id="3_rw4oa"]
+[ext_resource type="Resource" uid="uid://cvjbxri5wqa4p" path="res://resources/dice/virtual_dice/default_dice.tres" id="4_6aqbo"]
+[ext_resource type="AudioStream" uid="uid://b82t7u1nokry5" path="res://assets/audio/music/Hot Pursuit.mp3" id="4_kk2rg"]
+[ext_resource type="PackedScene" uid="uid://ctkgqdg4x1680" path="res://assets/models/environment/playfield.glb" id="4_ldkr4"]
+[ext_resource type="AudioStream" uid="uid://bkbd1lyrmo0o6" path="res://assets/audio/music/Mischief Maker.mp3" id="5_b5spy"]
+[ext_resource type="AudioStream" uid="uid://bph151w7c234i" path="res://assets/audio/music/Myst on the Moor.mp3" id="6_utbpp"]
+[ext_resource type="Script" uid="uid://br4gtxy05t17w" path="res://scripts/camera_controller.gd" id="7_kk2rg"]
+[ext_resource type="Script" uid="uid://cs1k8ut6sxote" path="res://scripts/board/boards/battle_board.gd" id="9_liy57"]
+[ext_resource type="PackedScene" uid="uid://rdxyckkjlmx6" path="res://assets/models/environment/battlefield.glb" id="10_mwyo0"]
+[ext_resource type="PackedScene" uid="uid://4qg3oj3ymbfj" path="res://scenes/board/spaces/game/battle_space.tscn" id="11_ttvoq"]
+[ext_resource type="PackedScene" uid="uid://8emees61l770" path="res://scenes/board/spaces/game/transition_space.tscn" id="12_rw4oa"]
+[ext_resource type="PackedScene" uid="uid://dd4ah61u5mrnf" path="res://scenes/board/spaces/testing/layer_agnostic_space.tscn" id="13_r47aq"]
+[ext_resource type="Script" uid="uid://beyulqvrwnx27" path="res://scripts/camera_target.gd" id="21_ro0ie"]
+
+[sub_resource type="GDScript" id="GDScript_6aqbo"]
+script/source = "extends Node
+
+@export var default_dice : DiceBase
+
+@onready var use_item: UseItem = $\"..\"
+
+func _ready() -> void:
+	use_item.add_item_to_inventory(0, default_dice)
+
+func _process(_delta: float) -> void:
+	if Input.is_action_just_pressed(\"1\"):
+		use_item.use_item(0)
+"
+
+[sub_resource type="GDScript" id="GDScript_utbpp"]
+resource_name = "GameBoard"
+script/source = "extends BattleBoard
+"
+
+[sub_resource type="Resource" id="Resource_xgstd"]
+script = ExtResource("2_tcjrq")
+space_settings = Dictionary[NodePath, int]({
+NodePath("../../ActivateSpace/Battle_Space"): 9
+})
+metadata/_custom_type_script = "uid://c77s1mu4f6488"
+
+[sub_resource type="Resource" id="Resource_pb36m"]
+script = ExtResource("2_tcjrq")
+space_settings = Dictionary[NodePath, int]({
+NodePath("../../ActivateSpace/Battle_Space"): 14
+})
+metadata/_custom_type_script = "uid://c77s1mu4f6488"
+
+[sub_resource type="Resource" id="Resource_85lt4"]
+script = ExtResource("2_tcjrq")
+space_settings = Dictionary[NodePath, int]({
+NodePath("../../ActivateSpace/Battle_Space"): 19
+})
+metadata/_custom_type_script = "uid://c77s1mu4f6488"
+
+[sub_resource type="GDScript" id="GDScript_77hjl"]
+script/source = "extends Node3D
+
+@export var layer_positions : Array[Node3D] = []
+@export var move_player: Move
+@export var transition_player: StateBase
+@export var board : BattleBoard
+
+@onready var player: Node3D = $Player
+@onready var animation_player: AnimationPlayer = $Player/AnimationPlayer
+
+func _ready() -> void:
+	move_player.on_take_step.connect(_take_step)
+	move_player.layer_changed.connect(_layer_changed)
+	player.position = layer_positions[0].position
+	player.rotation = layer_positions[0].rotation
+
+func _take_step(new_position : int) -> void:
+	var board_size : int = board.board[move_player.current_layer].size()
+	var tween : Tween = get_tree().create_tween()
+	rotation_degrees.y = -(360.0 / board_size) * (new_position-1)
+	var target_rotation : float = -(360.0 / board_size) * new_position
+	animation_player.play(\"moving\", .1)
+	tween.tween_property(self, \"rotation_degrees\", Vector3(0, target_rotation, 0), .499).finished.connect(func():
+		animation_player.play(\"idle\", .1), CONNECT_ONE_SHOT)
+
+func _layer_changed(new_layer : int) -> void:
+	if new_layer >= layer_positions.size(): return
+	animation_player.play(\"moving\", .1)
+	var tween : Tween = get_tree().create_tween()
+	tween.tween_property(player, \"position\", layer_positions[new_layer].position, .499)
+	tween.parallel().tween_property(player, \"rotation\", layer_positions[new_layer].rotation, .499).finished.connect(func():
+		animation_player.play(\"idle\", .1), CONNECT_ONE_SHOT)
+"
+
+[sub_resource type="BoxMesh" id="BoxMesh_kk2rg"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6aqbo"]
+albedo_color = Color(0.120962, 0.323175, 0.339851, 1)
+
+[sub_resource type="Animation" id="Animation_ro0ie"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Mesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Mesh:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Mesh:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_6aqbo"]
+resource_name = "idle"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Mesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Mesh:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Mesh:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_103ce"]
+resource_name = "moving"
+length = 0.5
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Mesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.125, 0.25, 0.365, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0, 0.5, 0), Vector3(0, 0, 0), Vector3(0, 0.5, 0), Vector3(0, 0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Mesh:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0.349066), Vector3(0, 0, -0.349066), Vector3(0, 0, 0.349066)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ro0ie"]
+_data = {
+&"RESET": SubResource("Animation_ro0ie"),
+&"idle": SubResource("Animation_6aqbo"),
+&"moving": SubResource("Animation_103ce")
+}
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_77hjl"]
+albedo_color = Color(0.359069, 0.359069, 0.359069, 1)
+
+[sub_resource type="GDScript" id="GDScript_pb36m"]
+script/source = "extends StateBase
+
+@export var move_player: Move
+@export var use_item: StateBase
+@export var win_state : StateBase
+
+func _custom_enter() -> void:
+	move_player.layer_changed.connect(layer_changed, CONNECT_ONE_SHOT)
+	move_player.current_layer += 1
+	if move_player.current_layer >= move_player.board.board.size():
+		state_machine.change_state(win_state)
+
+func layer_changed(_new_layer : int) -> void:
+	state_machine.change_state(use_item)
+"
+
+[sub_resource type="Resource" id="Resource_mwyo0"]
+script = ExtResource("2_tcjrq")
+space_settings = Dictionary[NodePath, int]({
+NodePath("../../ActivateSpace/Layer_Agnostic_Space"): 9
+})
+metadata/_custom_type_script = "uid://c77s1mu4f6488"
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s76x2"]
+albedo_color = Color(0.351563, 0.351563, 0.351563, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ro0ie"]
+albedo_color = Color(0.435408, 0.216746, 0.17777, 1)
+
+[sub_resource type="Environment" id="Environment_kk2rg"]
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.5
+tonemap_mode = 3
+ssao_enabled = true
+glow_enabled = true
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0, 0, 0, 1)
+fog_density = 1.0
+fog_depth_begin = 0.0
+
+[sub_resource type="GDScript" id="GDScript_onqr8"]
+script/source = "extends HBoxContainer
+
+@export var board_music : AudioStream
+@export var battle_music : AudioStream
+@export var challenge_music : AudioStream
+@export var treasure_music : AudioStream
+@export var death_music : AudioStream
+
+@onready var camera_3d: CameraController = $\"../../Camera3D\"
+
+func _on_board_pressed() -> void:
+	SceneManager.set_background_music(board_music)
+	camera_3d.move_to_node($\"../../CameraPositions/PlayerFollower/PlayerRig/PlayerCam\")
+
+
+func _on_battle_pressed() -> void:
+	SceneManager.set_background_music(battle_music)
+	camera_3d.move_to_node($\"../../CameraPositions/MiniGameRig/MiniGameCamera\")
+
+func _on_challenge_pressed() -> void:
+	SceneManager.set_background_music(challenge_music)
+	camera_3d.move_to_node($\"../../CameraPositions/MiniGameRig/MiniGameCamera\")
+
+func _on_treasure_pressed() -> void:
+	SceneManager.set_background_music(treasure_music)
+	camera_3d.move_to_node($\"../../CameraPositions/MiniGameRig/MiniGameCamera\")
+
+func _on_death_pressed() -> void:
+	SceneManager.set_background_music(death_music)
+	camera_3d.move_to_node($\"../../CameraPositions/TowerRig/TowerCamera\")
+"
+
+[sub_resource type="Curve" id="Curve_kk2rg"]
+_data = [Vector2(0, 0), 0.0, 2.76, 0, 0, Vector2(1, 1), 2.725, 0.0, 0, 0]
+point_count = 2
+
+[node name="GameScene" type="Node3D"]
+
+[node name="Game_State_Manager" type="Node" parent="." node_paths=PackedStringArray("start_state")]
+script = ExtResource("1_ldkr4")
+start_state = NodePath("Regular_Game")
+metadata/_custom_type_script = "uid://co3aoxk3kra10"
+
+[node name="Regular_Game" type="Node" parent="Game_State_Manager"]
+script = ExtResource("2_liy57")
+metadata/_custom_type_script = "uid://dlpe3g0jvmaxr"
+
+[node name="Mini_Game" type="Node" parent="Game_State_Manager"]
+script = ExtResource("2_liy57")
+metadata/_custom_type_script = "uid://dlpe3g0jvmaxr"
+
+[node name="Cutscene" type="Node" parent="Game_State_Manager"]
+script = ExtResource("2_liy57")
+metadata/_custom_type_script = "uid://dlpe3g0jvmaxr"
+
+[node name="QuestManager" type="Node" parent="."]
+script = ExtResource("3_rw4oa")
+
+[node name="Game_Manager" parent="." instance=ExtResource("1_mw25s")]
+active = false
+
+[node name="Node" type="Node" parent="Game_Manager/UseItem" index="0"]
+script = SubResource("GDScript_6aqbo")
+default_dice = ExtResource("4_6aqbo")
+
+[node name="MovePlayer" parent="Game_Manager" index="2" node_paths=PackedStringArray("board")]
+board = NodePath("BoardBase")
+
+[node name="BoardBase" type="Node" parent="Game_Manager/MovePlayer" index="0" node_paths=PackedStringArray("start_space", "layer_positions", "center", "board_node")]
+script = SubResource("GDScript_utbpp")
+start_space = NodePath("../../ActivateSpace/Transfer_Space")
+layer_positions = [NodePath("Board/center/layer_1_pos"), NodePath("Board/center/layer_2_pos"), NodePath("Board/center/layer_3_pos")]
+center = NodePath("Board/center")
+board_node = NodePath("Board")
+layer_settings = Array[ExtResource("2_tcjrq")]([SubResource("Resource_xgstd"), SubResource("Resource_pb36m"), SubResource("Resource_85lt4")])
+metadata/_custom_type_script = "uid://de705prxd2w07"
+
+[node name="PlayerRig" type="Node3D" parent="Game_Manager/MovePlayer/BoardBase" node_paths=PackedStringArray("layer_positions", "move_player", "transition_player", "board")]
+script = SubResource("GDScript_77hjl")
+layer_positions = [NodePath("Layer_1_Position"), NodePath("Layer_2_Position"), NodePath("Layer_3_Position")]
+move_player = NodePath("../..")
+transition_player = NodePath("../../../TransitionLayer")
+board = NodePath("..")
+
+[node name="Player" type="Node3D" parent="Game_Manager/MovePlayer/BoardBase/PlayerRig"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+
+[node name="Mesh" type="Node3D" parent="Game_Manager/MovePlayer/BoardBase/PlayerRig/Player"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Game_Manager/MovePlayer/BoardBase/PlayerRig/Player/Mesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("BoxMesh_kk2rg")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_6aqbo")
+
+[node name="RemoteTransform3D" type="RemoteTransform3D" parent="Game_Manager/MovePlayer/BoardBase/PlayerRig/Player"]
+remote_path = NodePath("../../../../../../CameraPositions/PlayerFollower")
+update_rotation = false
+update_scale = false
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Game_Manager/MovePlayer/BoardBase/PlayerRig/Player"]
+libraries = {
+&"": SubResource("AnimationLibrary_ro0ie")
+}
+
+[node name="Layer_1_Position" type="Node3D" parent="Game_Manager/MovePlayer/BoardBase/PlayerRig"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, -1, -6)
+
+[node name="Layer_2_Position" type="Node3D" parent="Game_Manager/MovePlayer/BoardBase/PlayerRig"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 1, -11)
+
+[node name="Layer_3_Position" type="Node3D" parent="Game_Manager/MovePlayer/BoardBase/PlayerRig"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 3, -16)
+
+[node name="Board" type="Node3D" parent="Game_Manager/MovePlayer/BoardBase"]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
+
+[node name="playfield" parent="Game_Manager/MovePlayer/BoardBase/Board" instance=ExtResource("4_ldkr4")]
+
+[node name="Cylinder_002" parent="Game_Manager/MovePlayer/BoardBase/Board/playfield" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_77hjl")
+
+[node name="center" type="Node3D" parent="Game_Manager/MovePlayer/BoardBase/Board"]
+
+[node name="layer_1_pos" type="Node3D" parent="Game_Manager/MovePlayer/BoardBase/Board/center"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.757558)
+
+[node name="layer_2_pos" type="Node3D" parent="Game_Manager/MovePlayer/BoardBase/Board/center"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.200099, -1.25756)
+
+[node name="layer_3_pos" type="Node3D" parent="Game_Manager/MovePlayer/BoardBase/Board/center"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.404113, -1.75756)
+
+[node name="TransitionLayer" parent="Game_Manager" index="3" node_paths=PackedStringArray("move_player", "use_item", "win_state")]
+script = SubResource("GDScript_pb36m")
+move_player = NodePath("../MovePlayer")
+use_item = NodePath("../UseItem")
+win_state = NodePath("../Win")
+
+[node name="Battle_Space" parent="Game_Manager/ActivateSpace" index="0" node_paths=PackedStringArray("game_state_manager", "game_state", "mini_game_state") instance=ExtResource("11_ttvoq")]
+visible = false
+game_state_manager = NodePath("../../../Game_State_Manager")
+game_state = NodePath("../../../Game_State_Manager/Regular_Game")
+mini_game_state = NodePath("../../../Game_State_Manager/Mini_Game")
+
+[node name="Transfer_Space" parent="Game_Manager/ActivateSpace" index="1" node_paths=PackedStringArray("move_player", "transition_state", "quest_manager") instance=ExtResource("12_rw4oa")]
+visible = false
+move_player = NodePath("../../MovePlayer")
+transition_state = NodePath("../../TransitionLayer")
+quest_manager = NodePath("../../../QuestManager")
+
+[node name="Layer_Agnostic_Space" parent="Game_Manager/ActivateSpace" index="2" instance=ExtResource("13_r47aq")]
+visible = false
+
+[node name="Battle_Manager" parent="." instance=ExtResource("3_rvs2r")]
+active = false
+
+[node name="Node" type="Node" parent="Battle_Manager/UseItem" index="0"]
+script = SubResource("GDScript_6aqbo")
+default_dice = ExtResource("4_6aqbo")
+
+[node name="Move" parent="Battle_Manager" index="2" node_paths=PackedStringArray("board")]
+board = NodePath("BattleBoard")
+
+[node name="BattleBoard" type="Node" parent="Battle_Manager/Move" index="0" node_paths=PackedStringArray("start_space", "layer_positions", "center", "board_node")]
+script = ExtResource("9_liy57")
+start_space = NodePath("../../ActivateSpace/Layer_Agnostic_Space")
+layer_positions = [NodePath("BoardNode/Center/layer_1_pos")]
+center = NodePath("BoardNode/Center")
+board_node = NodePath("BoardNode")
+layer_settings = Array[ExtResource("2_tcjrq")]([SubResource("Resource_mwyo0")])
+metadata/_custom_type_script = "uid://cs1k8ut6sxote"
+
+[node name="PlayerRig" type="Node3D" parent="Battle_Manager/Move/BattleBoard" node_paths=PackedStringArray("layer_positions", "move_player", "board")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -100, 0)
+script = SubResource("GDScript_77hjl")
+layer_positions = [NodePath("Layer_1_Position")]
+move_player = NodePath("../..")
+board = NodePath("..")
+
+[node name="Player" type="Node3D" parent="Battle_Manager/Move/BattleBoard/PlayerRig"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+
+[node name="Mesh" type="Node3D" parent="Battle_Manager/Move/BattleBoard/PlayerRig/Player"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Battle_Manager/Move/BattleBoard/PlayerRig/Player/Mesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("BoxMesh_kk2rg")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_6aqbo")
+
+[node name="RemoteTransform3D" type="RemoteTransform3D" parent="Battle_Manager/Move/BattleBoard/PlayerRig/Player"]
+remote_path = NodePath("../../../../../../CameraPositions/PlayerFollower")
+update_rotation = false
+update_scale = false
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Battle_Manager/Move/BattleBoard/PlayerRig/Player"]
+libraries = {
+&"": SubResource("AnimationLibrary_ro0ie")
+}
+
+[node name="Layer_1_Position" type="Node3D" parent="Battle_Manager/Move/BattleBoard/PlayerRig"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, -1, -6)
+
+[node name="BoardNode" type="Node3D" parent="Battle_Manager/Move/BattleBoard"]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, -100, 0)
+
+[node name="battlefield" parent="Battle_Manager/Move/BattleBoard/BoardNode" instance=ExtResource("10_mwyo0")]
+
+[node name="Cylinder_009" parent="Battle_Manager/Move/BattleBoard/BoardNode/battlefield" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_s76x2")
+
+[node name="Center" type="Node3D" parent="Battle_Manager/Move/BattleBoard/BoardNode"]
+
+[node name="layer_1_pos" type="Node3D" parent="Battle_Manager/Move/BattleBoard/BoardNode/Center"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.757558)
+
+[node name="Layer_Agnostic_Space" parent="Battle_Manager/ActivateSpace" index="0" instance=ExtResource("13_r47aq")]
+visible = false
+
+[node name="EnemyMove" parent="Battle_Manager" index="5" node_paths=PackedStringArray("board")]
+board = NodePath("../Move/BattleBoard")
+
+[node name="EnemyRig" type="Node3D" parent="Battle_Manager/EnemyMove" index="0" node_paths=PackedStringArray("layer_positions", "move_player", "board")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -100, 0)
+script = SubResource("GDScript_77hjl")
+layer_positions = [NodePath("Layer_1_Position")]
+move_player = NodePath("..")
+board = NodePath("../../Move/BattleBoard")
+
+[node name="Player" type="Node3D" parent="Battle_Manager/EnemyMove/EnemyRig"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+
+[node name="Mesh" type="Node3D" parent="Battle_Manager/EnemyMove/EnemyRig/Player"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Battle_Manager/EnemyMove/EnemyRig/Player/Mesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("BoxMesh_kk2rg")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_ro0ie")
+
+[node name="RemoteTransform3D" type="RemoteTransform3D" parent="Battle_Manager/EnemyMove/EnemyRig/Player"]
+remote_path = NodePath("../../../../../CameraPositions/PlayerFollower")
+update_rotation = false
+update_scale = false
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Battle_Manager/EnemyMove/EnemyRig/Player"]
+libraries = {
+&"": SubResource("AnimationLibrary_ro0ie")
+}
+
+[node name="Layer_1_Position" type="Node3D" parent="Battle_Manager/EnemyMove/EnemyRig"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, -1, -7.5)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_kk2rg")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, 0.612372, -0.353554, 0, 0.5, 0.866025, 0.707107, -0.612372, 0.353554, 0, 0, 0)
+shadow_enabled = true
+
+[node name="BackgroundMusic" type="Node" parent="."]
+script = ExtResource("1_onqr8")
+background_audio = ExtResource("2_ycayy")
+metadata/_custom_type_script = "uid://dq7xwx2fd3o80"
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer"]
+offset_right = 40.0
+offset_bottom = 40.0
+script = SubResource("GDScript_onqr8")
+board_music = ExtResource("2_ycayy")
+battle_music = ExtResource("3_rurhu")
+challenge_music = ExtResource("4_kk2rg")
+treasure_music = ExtResource("5_b5spy")
+death_music = ExtResource("6_utbpp")
+
+[node name="board" type="Button" parent="CanvasLayer/HBoxContainer"]
+layout_mode = 2
+text = "board"
+
+[node name="battle" type="Button" parent="CanvasLayer/HBoxContainer"]
+layout_mode = 2
+text = "battle"
+
+[node name="challenge" type="Button" parent="CanvasLayer/HBoxContainer"]
+layout_mode = 2
+text = "challenge"
+
+[node name="treasure" type="Button" parent="CanvasLayer/HBoxContainer"]
+layout_mode = 2
+text = "treasure"
+
+[node name="death" type="Button" parent="CanvasLayer/HBoxContainer"]
+layout_mode = 2
+text = "death"
+
+[node name="Camera3D" type="Camera3D" parent="."]
+script = ExtResource("7_kk2rg")
+move_time = 25.0
+tween_curve = SubResource("Curve_kk2rg")
+
+[node name="CameraPositions" type="Node" parent="."]
+
+[node name="PlayerFollower" type="Node3D" parent="CameraPositions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -100, 0)
+
+[node name="PlayerRig" type="Node3D" parent="CameraPositions/PlayerFollower"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 0, 0)
+
+[node name="PlayerCam" type="Node3D" parent="CameraPositions/PlayerFollower/PlayerRig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 11)
+script = ExtResource("21_ro0ie")
+
+[node name="EventRig" type="Node3D" parent="CameraPositions/PlayerFollower"]
+transform = Transform3D(-4.37114e-08, -0.258819, 0.965925, 0, 0.965925, 0.258819, -1, 1.13133e-08, -4.22219e-08, 0, 0, 0)
+
+[node name="EventCam" type="Node3D" parent="CameraPositions/PlayerFollower/EventRig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.5)
+script = ExtResource("21_ro0ie")
+
+[node name="TowerRig" type="Node3D" parent="CameraPositions"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 0, 0)
+
+[node name="TowerCamera" type="Node3D" parent="CameraPositions/TowerRig"]
+transform = Transform3D(1, 0, 0, 0, 0.113168, -0.993576, 0, 0.993576, 0.113168, 0, 38.0186, -22.3306)
+script = ExtResource("21_ro0ie")
+
+[node name="MiniGameRig" type="Node3D" parent="CameraPositions"]
+transform = Transform3D(1, 0, 0, 0, 0.393573, 0.919293, 0, -0.919293, 0.393573, 0, -100.643, 2.35678)
+
+[node name="MiniGameCamera" type="Node3D" parent="CameraPositions/MiniGameRig"]
+transform = Transform3D(1, 0, 0, 0, 1, 2.98023e-08, 0, -2.98023e-08, 1, 0, 0, 14.6087)
+script = ExtResource("21_ro0ie")
+
+[connection signal="on_enter" from="Game_State_Manager/Regular_Game" to="CameraPositions/PlayerFollower/PlayerRig/PlayerCam" method="make_camera_follow"]
+[connection signal="on_enter" from="Game_State_Manager/Regular_Game" to="Game_Manager" method="set_active" binds= [true]]
+[connection signal="on_exit" from="Game_State_Manager/Regular_Game" to="Game_Manager" method="set_active" binds= [false]]
+[connection signal="on_enter" from="Game_State_Manager/Mini_Game" to="CameraPositions/MiniGameRig/MiniGameCamera" method="make_camera_follow"]
+[connection signal="on_enter" from="Game_State_Manager/Mini_Game" to="Battle_Manager" method="set_active" binds= [true]]
+[connection signal="on_exit" from="Game_State_Manager/Mini_Game" to="Battle_Manager" method="set_active" binds= [false]]
+[connection signal="on_enter" from="Game_Manager/UseItem" to="CameraPositions/PlayerFollower/PlayerRig/PlayerCam" method="make_camera_follow"]
+[connection signal="pressed" from="CanvasLayer/HBoxContainer/board" to="CanvasLayer/HBoxContainer" method="_on_board_pressed"]
+[connection signal="pressed" from="CanvasLayer/HBoxContainer/battle" to="CanvasLayer/HBoxContainer" method="_on_battle_pressed"]
+[connection signal="pressed" from="CanvasLayer/HBoxContainer/challenge" to="CanvasLayer/HBoxContainer" method="_on_challenge_pressed"]
+[connection signal="pressed" from="CanvasLayer/HBoxContainer/treasure" to="CanvasLayer/HBoxContainer" method="_on_treasure_pressed"]
+[connection signal="pressed" from="CanvasLayer/HBoxContainer/death" to="CanvasLayer/HBoxContainer" method="_on_death_pressed"]
+
+[editable path="Game_Manager"]
+[editable path="Game_Manager/MovePlayer/BoardBase/Board/playfield"]
+[editable path="Battle_Manager"]
+[editable path="Battle_Manager/Move/BattleBoard/BoardNode/battlefield"]

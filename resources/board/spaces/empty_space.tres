@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="EmptySpace" load_steps=3 format=3 uid="uid://bt1lum5p1m4x5"]
+
+[ext_resource type="PackedScene" uid="uid://d3gakmqws103l" path="res://assets/models/environment/layer_agnostic_space.glb" id="1_7unhy"]
+[ext_resource type="Script" uid="uid://obki4igadg2t" path="res://scripts/board/spaces/empty.gd" id="1_f1ogq"]
+
+[resource]
+script = ExtResource("1_f1ogq")
+scene = ExtResource("1_7unhy")
+metadata/_custom_type_script = "uid://obki4igadg2t"

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="TransitionSpace" load_steps=3 format=3 uid="uid://uk202wwtveur"]
+
+[ext_resource type="Script" uid="uid://cqib7fshxv107" path="res://scripts/board/spaces/game/transition_space.gd" id="1_epjwu"]
+[ext_resource type="PackedScene" uid="uid://8emees61l770" path="res://scenes/board/spaces/game/transition_space.tscn" id="1_uof17"]
+
+[resource]
+script = ExtResource("1_epjwu")
+scene = ExtResource("1_uof17")
+metadata/_custom_type_script = "uid://cqib7fshxv107"

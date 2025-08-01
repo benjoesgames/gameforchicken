@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Virtual_Regular_Dice" load_steps=2 format=3 uid="uid://cvjbxri5wqa4p"]
+
+[ext_resource type="Script" uid="uid://begag5w1leyy5" path="res://scripts/items/dice/virtual_regular_dice.gd" id="1_2r8g8"]
+
+[resource]
+script = ExtResource("1_2r8g8")
+values = Array[int]([1, 2, 3, 4, 5, 6])
+uses = 0
+description = "Dice values: 1, 2, 3, 4, 5, 6"
+metadata/_custom_type_script = "uid://begag5w1leyy5"

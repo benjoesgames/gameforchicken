@@ -1,0 +1,125 @@
+[gd_scene load_steps=2 format=3 uid="uid://dmvw724qwn2qs"]
+
+[sub_resource type="GDScript" id="GDScript_1nb4i"]
+script/source = "extends Node
+
+@export var run_times : int = 10
+@export var player_max_hp : int = 10
+@export var heal_chance : float = .5
+
+@export var layer1_rooms : Dictionary[StringName, int] = {}
+@export var layer2_rooms : Dictionary[StringName, int] = {}
+@export var layer3_rooms : Dictionary[StringName, int] = {}
+
+@export var quest_requirements : Array[int] = []
+
+@onready var layers : Array = [layer1_rooms, layer2_rooms, layer3_rooms]
+
+var board : Dictionary[int, Array] = {}
+var current_layer : int = 0
+var quest_completed : int = 0
+var current_spot : int = 0
+var current_hp : int = player_max_hp
+var active_quests : Array[int] = []
+var completions : int = 0
+
+var avg_required_throws : float = 0
+
+func _ready() -> void:
+	await get_tree().process_frame
+	for r in run_times:
+		generate_board()
+		play_board()
+		$\"../Label\".text = str(r, \"(\", completions, \")\")
+		await get_tree().process_frame
+	avg_required_throws = float(avg_required_throws) / float(run_times)
+	var completion_rate = (float(completions) / float(run_times)) * 100
+	print(\"Avg required throws: \", avg_required_throws)
+	print(\"Avg completion rate: \", completion_rate, \"%\")
+
+func generate_board() -> void:
+	for i in layers.size():
+		board[i] = []
+		for l in layer1_rooms:
+			for r in layer1_rooms[l]:
+				board[i].append(l)
+		board[i].shuffle()
+		board[i].push_front(\"transition\")
+
+func play_board() -> void:
+	current_layer = 0
+	current_hp = player_max_hp
+	while current_layer < 3:
+		quest_completed = 0
+		current_spot = 0
+		active_quests = []
+		var current_max_spot : int = board[current_layer].size()
+		var can_transition : bool = false
+		current_hp = min(current_hp + floori(player_max_hp/2), player_max_hp)
+		while not can_transition:
+			var dice_throw = randi_range(1, 6)
+			avg_required_throws += 1
+			current_spot += dice_throw
+			if current_spot >= current_max_spot:
+				current_spot -= current_max_spot
+				can_transition = quest_completed >= quest_requirements[current_layer]
+			if not can_transition:
+				match board[current_layer][current_spot]:
+					\"quest\": 
+						if not active_quests.has(current_spot):
+							active_quests.append(current_spot)
+						else:
+							active_quests.erase(current_spot)
+							quest_completed += 1
+					\"battle\":
+						current_hp -= randi_range(0, 5)
+						if current_hp <= 0:
+							#print('PLAYER DIED at: ', current_layer, \", \", current_spot)
+							return
+					\"empty\": 
+						if randf() < heal_chance:
+							current_hp = min(current_hp + 1, player_max_hp)
+					\"transition\": pass
+			else:
+				current_spot = 0
+		current_layer += 1
+	#print('Player completed game!')
+	completions += 1
+"
+
+[node name="Gameplay_Simulator" type="Node2D"]
+
+[node name="Testing" type="Node" parent="."]
+script = SubResource("GDScript_1nb4i")
+run_times = 1000
+heal_chance = 1.0
+layer1_rooms = Dictionary[StringName, int]({
+&"battle": 5,
+&"empty": 2,
+&"quest": 3
+})
+layer2_rooms = Dictionary[StringName, int]({
+&"battle": 7,
+&"empty": 4,
+&"quest": 4
+})
+layer3_rooms = Dictionary[StringName, int]({
+&"battle": 10,
+&"empty": 5,
+&"quest": 5
+})
+quest_requirements = Array[int]([1, 2, 3])
+
+[node name="Label" type="Label" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 2.0
+offset_right = 1156.0
+offset_bottom = 642.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 32
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1

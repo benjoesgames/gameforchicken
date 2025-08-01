@@ -1,0 +1,124 @@
+[gd_scene load_steps=2 format=3 uid="uid://cnybnsqq6ng0n"]
+
+[sub_resource type="GDScript" id="GDScript_v2hrn"]
+script/source = "extends Node
+class_name TEST_Combat_Simulaiton
+
+@export var spaces : Dictionary[StringName, int] = {}
+@export var run_num : int = 10
+
+var board : Array[StringName] = []
+
+var player1_base = {
+	hp = 10,
+	spaces = [],
+	attacks = 0,
+	defends = 0,
+	current_space = 0
+}
+
+var player2_base = {
+	hp = 3,
+	spaces = [],
+	attacks = 0,
+	defends = 0,
+	current_space = 0
+}
+
+var player_hp_left = 0
+var player_wins = 0
+var max_round_num = 0
+var min_round_num = 100
+
+func _ready() -> void:
+	var avg_rounds = 0
+	for f in run_num:
+		generate_board()
+		avg_rounds += run_game()
+	avg_rounds = float(avg_rounds) / float(run_num)
+	player_hp_left = float(player_hp_left) / float(run_num)
+	player_wins = float(player_wins) / float(run_num) * 100
+	print(\"Avg round number: \", avg_rounds, \"(max:\", max_round_num, \", min:\", min_round_num,\")\")
+	print(\"Avg player hp left: \", player_hp_left)
+	print(\"player win ratio: \", player_wins, \"%\")
+
+func generate_board() -> void:
+	board = []
+	board.append(\"action\")
+	var left_spaces = spaces.duplicate()
+	var all_spaces = 0
+	for ls in left_spaces:
+		all_spaces += left_spaces[ls]
+	for i in all_spaces:
+		var count = 0
+		var rs = \"\"
+		while count == 0:
+			rs = left_spaces.keys().pick_random()
+			count = left_spaces[rs]
+		board.append(rs)
+		left_spaces[rs] = count - 1
+
+func run_game() -> int:
+	var player1 = player1_base.duplicate(true)
+	var player2 = player2_base.duplicate(true)
+	var players = [player1, player2]
+	var round_num = 0
+	while player1.hp > 0 and player2.hp > 0:
+		var current_player = players.pop_back()
+		var dice = randi_range(1, 6)
+		var space = current_player.current_space
+		space += dice
+		if space >= board.size():
+			space -= board.size()
+			activate_actions(current_player, players[0])
+			player1.spaces = []
+			player2.spaces = []
+			player1.current_space = 0
+			player2.current_space = 0
+			player1.attacks = 0
+			player2.attacks = 0
+			player1.defends = 0
+			player2.defends = 0
+			round_num += 1
+		else:
+			if not player1.spaces.has(space) and not player2.spaces.has(space):
+				current_player.current_space = space
+				current_player.spaces.append(space)
+				var space_type = board[space]
+				match space_type:
+					\"attack\": current_player.attacks += 1
+					\"defend\": current_player.defends += 1
+					\"critical\": current_player.attacks += 2
+		players.push_front(current_player)
+	if player1.hp > 0:
+		player_wins += 1
+		player_hp_left += player1.hp
+	max_round_num = max(max_round_num, round_num)
+	min_round_num = min(min_round_num, round_num)
+	return round_num
+
+func activate_actions(current_player, other_player) -> void:
+	var first_player = current_player
+	var second_player = other_player
+	
+	var dmg1 = max(first_player.attacks - second_player.defends, 0)
+	second_player.hp -= dmg1
+	
+	if second_player.hp <= 0:
+		return
+	
+	var dmg2 = max(second_player.attacks - first_player.defends, 0)
+	first_player.hp -= dmg2
+"
+
+[node name="Combat_Simulation" type="Node2D"]
+
+[node name="Testing" type="Node" parent="."]
+script = SubResource("GDScript_v2hrn")
+spaces = Dictionary[StringName, int]({
+&"attack": 4,
+&"critical": 1,
+&"defend": 3,
+&"empty": 1
+})
+run_num = 1000

@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://cmiamn2slbg7y"
+path="res://.godot/imported/Our Story Begins.mp3-3acc08f3146141547200d88f8b0f1b98.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/Our Story Begins.mp3"
+dest_files=["res://.godot/imported/Our Story Begins.mp3-3acc08f3146141547200d88f8b0f1b98.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

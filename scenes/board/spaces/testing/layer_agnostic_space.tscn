@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3 uid="uid://dd4ah61u5mrnf"]
+
+[ext_resource type="PackedScene" uid="uid://d3gakmqws103l" path="res://assets/models/environment/layer_agnostic_space.glb" id="1_eebb0"]
+[ext_resource type="Script" uid="uid://dkohof3tlgswn" path="res://scripts/board/space_base.gd" id="1_sf4o2"]
+[ext_resource type="Texture2D" uid="uid://cm4qvgv4oa6py" path="res://assets/textures/testing/kenney_icons/pentagon_question.png" id="2_jj8eb"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eebb0"]
+albedo_color = Color(0.386624, 0.390855, 0.605015, 1)
+
+[node name="Layer_Agnostic_Space" type="Node3D"]
+script = ExtResource("1_sf4o2")
+
+[node name="layer_agnostic_space2" parent="." instance=ExtResource("1_eebb0")]
+
+[node name="Cylinder_010" parent="layer_agnostic_space2" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_eebb0")
+
+[node name="Sprite" type="Sprite3D" parent="."]
+transform = Transform3D(0.148059, 0, 0, 0, -6.47186e-09, 0.148059, 0, -0.148059, -6.47186e-09, 0, -0.0719964, -0.0385944)
+texture = ExtResource("2_jj8eb")
+
+[editable path="layer_agnostic_space2"]

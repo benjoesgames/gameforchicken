@@ -1,0 +1,109 @@
+[gd_scene load_steps=6 format=3 uid="uid://dx5fekdynpcni"]
+
+[sub_resource type="Environment" id="Environment_oorpv"]
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.5
+tonemap_mode = 3
+ssao_enabled = true
+glow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oorpv"]
+albedo_color = Color(0.326314, 0.293564, 0.261413, 1)
+
+[sub_resource type="GDScript" id="GDScript_oorpv"]
+script/source = "extends Node3D
+
+@export var speed : float = 1.0
+
+@onready var player: Node3D = $Level1/Player
+@onready var level_1: Node3D = $Level1
+@onready var level_2: Node3D = $Level2
+@onready var level_3: Node3D = $Level3
+
+var current_level : int = 0 : set = _set_level
+
+@onready var levels : Array[Node3D] = [level_1, level_2, level_3]
+
+func _process(delta: float) -> void:
+	rotate(Vector3.UP, (TAU / 360) * delta * speed)
+	if Input.is_action_just_pressed(\"up\"):
+		current_level = min(2, current_level + 1)
+	elif Input.is_action_just_pressed(\"down\"):
+		current_level = max(0, current_level - 1)
+
+func _set_level(value : int) -> void:
+	current_level = value
+	player.reparent(levels[current_level], false)
+"
+
+[sub_resource type="BoxMesh" id="BoxMesh_egwu7"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ys465"]
+albedo_color = Color(0.295811, 0.644164, 0.877711, 1)
+
+[node name="Node3D" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_oorpv")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, 0.612372, -0.353553, 0, 0.5, 0.866025, 0.707107, -0.612372, 0.353553, 0, 0, 0)
+shadow_enabled = true
+
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="."]
+material_override = SubResource("StandardMaterial3D_oorpv")
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.5, 0)
+radius = 40.0
+height = 5.0
+sides = 32
+
+[node name="CSGCylinder3D2" type="CSGCylinder3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+operation = 2
+radius = 30.0
+height = 3.0
+sides = 32
+
+[node name="CSGCylinder3D3" type="CSGCylinder3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+operation = 2
+radius = 20.0
+height = 6.0
+sides = 32
+
+[node name="CSGCylinder3D4" type="CSGCylinder3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.45361, -72)
+radius = 5.0
+height = 16.9072
+sides = 32
+
+[node name="CameraRig" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, 0)
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 14, 0)
+
+[node name="Carousel" type="Node3D" parent="."]
+script = SubResource("GDScript_oorpv")
+speed = 100.0
+
+[node name="Level1" type="Node3D" parent="Carousel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, -15)
+
+[node name="Player" type="Node3D" parent="Carousel/Level1"]
+
+[node name="Model" type="Node3D" parent="Carousel/Level1/Player"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Carousel/Level1/Player/Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("BoxMesh_egwu7")
+surface_material_override/0 = SubResource("StandardMaterial3D_ys465")
+
+[node name="Level2" type="Node3D" parent="Carousel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, -25)
+
+[node name="Level3" type="Node3D" parent="Carousel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -35)
